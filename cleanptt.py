@@ -2,93 +2,38 @@ import pandas as pd
 import numpy as np
 import re 
 
-# Read data from csv file
-dataset = pd.read_csv("ptt_sample_data.csv")
 
+def clean_article(x):
+    return re.sub('[^A-Za-z0-9\u4e00-\u9fa5]', '',  str(x))
 
-# delete nan in row (row means horizantal direction)
-dataset = dataset.dropna()
+df = pd.read_csv('ptt_sample_data.csv')
+df['article_cleaned'] = df['article'].map(clean_article)
+df[['article_cleaned', 'article']].head(5)
+df.to_csv("clean_data.csv",index = 0)
 
+def top_post_users():
+    df = pd.read_csv("ptt_sample_data.csv")
+    df = df.dropna()
+    top_author = df["author"]
+    top_author = top_author.groupby(top_author).count().sort_values()
+    top_author = top_author[top_author.values > 1]
+    top_author.to_csv("top_author.csv")
 
-# transform DataFrame data to Numpy array
-dataset = dataset.values
-
-
-
-#Define the Function to clean the bizaare data attribute values.
-def Clean(dataset):
-# Loop all 2-d array element and transform all the elements to str type data
-    tuple_inex = dataset.shape
-    for x in range(0, tuple_inex[0]):
-        for y in range(0, tuple_inex[1]):
-           dataset[x, y] = str(dataset[x, y])
-# Loop all 2-d array element and filter all the elements that are special pattern or symbol.
-    for x in range(0, tuple_inex[0]):
-        for y in range(0, tuple_inex[1]):
-          dataset[x, y] = re.sub('[^A-Za-z0-9\u4e00-\u9fa5]', '',  dataset[x, y])
-    return pd.DataFrame(dataset)
-
-
-#Check output dimension is ok or not.
-#print(Clean(dataset).shape)
-
-
-
-#####Below is the major  output
-
-# 1. Output cleaning data to csv file
-Clean(dataset).to_csv("clean data")
-
-# 2. Output the highest Four authors that have more articles in the data
-def FourAuthor():
-    dataset = pd.read_csv("ptt_sample_data.csv")
-    dataset = dataset.dropna()
-    A = dataset["author"]
-    author = A.groupby(dataset["author"]).count().sort_values()   
-    return author
-   
-
-fourauthor = FourAuthor()
-#print(len(fourauthor))
-#print(type(fourauthor))
-#fourauthor = fourauthor[53:57]
-fourauthor = fourauthor[fourauthor.values > 1]
-fourauthor.to_csv("fourauthor")
-
-
- # 3. Output the title attribute that has the word "情報*" 
-def SearchWord():
-    # Search all the titles containing the word "情報"
-    dataset = pd.read_csv("ptt_sample_data.csv")
-    dataset = dataset.dropna()
-    # transform DataFrame data to Numpy array
-    dataset = dataset.values
-    # Loop all 2-d array element and transform all the elements to str type data
-    tuple_inex = dataset.shape
+top_post_users()
+ 
+def Search_Word():
+    df = pd.read_csv("ptt_sample_data.csv")
+    df = df.dropna()
+    df = df.values
+    tuple_inex = df.shape
     for x in range(0, tuple_inex[0]):
         for y in range(0,tuple_inex[1]):
-           dataset[x, y] = str(dataset[x, y])
-# Loop all 2-d array element and filter all the elements that are special pattern or symbol.
+           df[x, y] = str(df[x, y])
     for x in range(0, tuple_inex[0]):
         for y in range(0, tuple_inex[1]):
-          dataset[x, y] = re.sub('[^A-Za-z0-9\u4e00-\u9fa5]', '',  dataset[x, y])
-    dataset = pd.DataFrame(dataset)
-    return dataset[dataset[1].str.contains("情報", na = False)]
+          df[x, y] = re.sub('[^A-Za-z0-9\u4e00-\u9fa5]', '',  df[x, y])
+    df = pd.DataFrame(df)
+    return df[df[1].str.contains("情報", na = False)]
     
-     
-
-
-#print(type(SearchWord()))
-#print(SearchWord().shape)
-SearchString = SearchWord()
-SearchString.to_csv("SearchString")
-
-
-
- 
-
-
-
-
-
-
+Search_String = Search_Word()
+Search_String.to_csv("Search_String.csv", index = 0)
